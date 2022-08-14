@@ -1,15 +1,31 @@
+* [Implement Sedna Python SDK support TinyMS](#mplement Sedna Python SDK support TinyMS)
+  * [Motivation](#Motivation)
+    * [Goals](Goals)
+  * [Proposal](Proposal)
+    * [Sedna Architecture analysis](Sedna Architecture analysis)
+    * [Feasibility](Feasibility)
+  * [Design Details](Design Details)
+    * [set_backend()](set_backend()  )
+    * [TInyMS API](TInyMS API)
+    * [Demo Based on MSBackend](Based on MSBackend)
+    * [Demo Based on TinyMSBackend](Based on MSBackend)
+  * [Road Map](#Road Map)
+
 #  Implement Sedna Python SDK support TinyMS
-# Motivation
+
+## Motivation
 
 Currently, Sedna only supports sklearn's xgboost, Tensorflow, Keras, PyTorch and MindSpore, but doesn’t support MindSpore’s high-level API tool TinyMS.
 
 This proposal aims to implement Senda Python SDK ‘s support for TinyMS based on  Sedna's lib development interface and implements an Incremental Learning demo.
 
-## Goals
+### Goals
 
 - Implement Sedna Python SDK support of TinyMS
 
-## Sedna Architecture analysis
+## Proposal
+
+### Sedna Architecture analysis
 
 ![](./images/tinyms-support-architecture.png)
 
@@ -22,7 +38,7 @@ Taking the case yolo3 incremental learning in Sedna as an example, the user wrap
 
 - TFBackend implements the specific framework-related configuration.
 
-## Feasibility
+### Feasibility
 
 Sedna parses the underlying framework of the model and runs the model using a different machine learning framework through a backend pair. So we need to :
 
@@ -87,18 +103,14 @@ class TinyMSBackend(MSBackend):
 	...
 ```
 
-## Demo
-
-The demo will solve [dog and croissant classification task based on MobileNetV2](https://www.mindspore.cn/tutorials/zh-CN/r1.7/beginner/infer.html)
-
-### Based on MSBackend
+## Demo Based on MSBackend
 
 - [implement MobileNetV2 with MindSpore](https://www.mindspore.cn/tutorial/zh-CN/r0.7/advanced_use/mobilenetv2_incremental_learning.html)
 
 - Build an estimator class based on MobileNetV2, encapsulating a series of methods such as `train(),evaluate(),predict()`, etc.
 - Call incremental learning API to accomplish model training, evaluation, and inference
 
-### Based on TinyMSBackend
+## Demo Based on TinyMSBackend
 
 - [implement MobileNetV2 with TinyMS](https://tinyms.readthedocs.io/en/latest/tutorials/ipynb/TinyMS_MobileNetV2_tutorial.html)
 
