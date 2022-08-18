@@ -1,15 +1,15 @@
-* [Implement Sedna Python SDK support TinyMS](#mplement Sedna Python SDK support TinyMS)
-  * [Motivation](#Motivation)
-    * [Goals](#Goals)
-  * [Proposal](#Proposal)
-    * [Sedna Architecture analysis](#Sedna Architecture analysis)
-    * [Feasibility](#Feasibility)
-  * [Design Details](#Design Details)
-    * [set_backend()](#set_backend()  )
-    * [TInyMS API](#TInyMS API)
-    * [Demo Based on MSBackend](#Based on MSBackend)
-    * [Demo Based on TinyMSBackend](#Based on MSBackend)
-  * [Road Map](#Road Map)
+- [Implement Sedna Python SDK support TinyMS](#mplement Sedna Python SDK support TinyMS)
+  - [Motivation](#Motivation)
+    - [Goals](#Goals)
+- [Proposal](#Proposal)
+    - [Sedna Architecture analysis](#Sedna Architecture analysis)
+    - [Feasibility](#Feasibility)
+- [Design Details](#Design Details)
+    - [set_backend()](#set_backend()  )
+    - [TInyMS API](#TInyMS API)
+    - [Demo Based on MSBackend](#Based on MSBackend)
+    - [Demo Based on TinyMSBackend](#Based on MSBackend)
+- [Road Map](#Road Map)
 
 #  Implement Sedna Python SDK support TinyMS
 
@@ -22,6 +22,7 @@ This proposal aims to implement Senda Python SDK ‘s support for TinyMS based o
 ### Goals
 
 - Implement Sedna Python SDK support of TinyMS
+- Write user guide document of TinyMS
 
 ## Proposal
 
@@ -82,22 +83,29 @@ TinyMS is MindSpore's high-level API, but the TinyMS’s methods are not the sam
 ```python
 class TinyMSBackend(MSBackend):
 	def __init__(self, estimator, fine_tune=True, **kwargs):
-    ...
+        ...
 	
     def train(self, train_data, valid_data=None, **kwargs):
-    ...
+        ...
     
     def predict(self, data, **kwargs):
-    ...
+        ...
     
-    def evaluate(self, data, **kwargs):
-    ...
-    
+    def evaluate(self, valid_data, **kwargs):
+        ...
+  
+    def save(self, model_path=None):
+        ...
+  
+    def load(self, model_url=""):
+        ...
+  
     def load_weights(self):
-	...
+	    ...
+    
     
     def get_weights(self):
-	...
+	    ...
 	
 	def set_weights(self, weights):
 	...
