@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:1.15.4
+FROM mindspore/mindspore-cpu:1.7.1
 
 RUN apt update \
   && apt install -y libgl1-mesa-glx
