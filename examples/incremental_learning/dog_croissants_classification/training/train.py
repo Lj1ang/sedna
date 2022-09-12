@@ -18,31 +18,38 @@ from sedna.core.incremental_learning import IncrementalLearning
 
 from interface import Estimator
 from dataset import ImgDataset
-
+'''
 os.environ["class_name"] = "Croissants, Dog"
 os.environ["input_shape"] = "224"
 os.environ["epochs"] = "10"
 os.environ["batch_size"] = "10"
-
+os.environ["MODEL_URL"] = "./best.ckpt"
+'''
 def main():
 
     class_names=Context.get_parameters("class_name")
-
+    print(Context.get_parameters("model_path"))
     #read parameters from deployment config
     input_shape=int(Context.get_parameters("input_shape"))
-    epochs=int(Context.get_parameters("epochs"))
+    epochs=int(Context.get_parameters('epochs'))
     batch_size=int(Context.get_parameters("batch_size"))
 
     # load dataset
     #train_dataset_url = BaseConfig.train_dataset_url
     train_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/train"
+    valid_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/val"
     train_data = ImgDataset(data_type="train").parse(path=train_dataset_url,
-                                    train=True,
-                                    image_shape=input_shape,
-                                    batch_size=batch_size)
-
+                                                     train=True,
+                                                     image_shape=input_shape,
+                                                     batch_size=batch_size)
+    valid_data=ImgDataset(data_type="eval").parse(path=valid_dataset_url,
+                                                  train=False,
+                                                  image_shape=input_shape,
+                                                  batch_size=batch_size)
     incremental_instance = IncrementalLearning(estimator=Estimator)
-    return incremental_instance.train(train_data=train_data, epochs=epochs,
+    return incremental_instance.train(train_data=train_data,
+                                      valid_data=valid_data,
+                                      epochs=epochs,
                                       batch_size=batch_size,
                                       class_names=class_names,
                                       input_shape=input_shape)

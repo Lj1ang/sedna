@@ -14,7 +14,7 @@ class mobilenet_v2_fine_tune:
         self.param_dict = ms.load_checkpoint("./mobilenet_v2_1.0_224.ckpt")
         self.filter_list=[x.name for x in self.network.head.classifier.get_parameters()]
 
-    def filter_ckpt_parameter(origin_dict, param_filter):
+    def filter_ckpt_parameter(self, origin_dict, param_filter):
         for key in list(origin_dict.keys()):
             for name in param_filter:
                 if name in key:

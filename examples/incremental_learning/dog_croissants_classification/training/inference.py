@@ -1,0 +1,45 @@
+# Copyright 2021 The KubeEdge Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+import os
+import PIL
+
+from PIL import Image
+from sedna.common.config import Context, BaseConfig
+from sedna.core.incremental_learning import IncrementalLearning
+
+from interface import Estimator
+from dataset import ImgDataset
+
+def main():
+
+    class_names=Context.get_parameters("class_name")
+    print(Context.get_parameters("model_path"))
+    #read parameters from deployment config
+    input_shape=int(Context.get_parameters("input_shape"))
+
+
+    # load dataset
+    #train_dataset_url = BaseConfig.train_dataset_url
+    infer_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/infer/croissants.jpg"
+    infer_data=Image.open(infer_dataset_url)
+    incremental_instance = IncrementalLearning(estimator=Estimator)
+    return incremental_instance.inference(data=infer_data,
+                                      class_names=class_names,
+                                      input_shape=input_shape)
+
+if __name__ == "__main__":
+    main()
+

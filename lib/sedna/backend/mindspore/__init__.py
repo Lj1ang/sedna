@@ -25,7 +25,6 @@ class MSBackend(BackendBase):
                                         fine_tune=fine_tune,
                                         **kwargs)
         self.framework = "mindspore"
-
         if self.use_npu:
             context.set_context(mode=context.GRAPH_MODE, device_target="Ascend")
         elif self.use_cuda:

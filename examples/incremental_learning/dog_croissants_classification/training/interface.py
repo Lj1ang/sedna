@@ -54,22 +54,22 @@ class Estimator:
         network=mobilenet_v2_fine_tune().get_model()
         network_opt=nn.Momentum(params=network.trainable_params(),learning_rate=0.01,momentum=0.9)
         network_loss=CrossEntropySmooth(sparse=True, reduction="mean", smooth_factor=0.1, classes_num=2)
-        metrics = {"Accuracy" : nn.Accuracy}
+        metrics = {"Accuracy" : nn.Accuracy()}
         model=ms.Model(network, loss_fn=network_loss, optimizer=network_opt, metrics=metrics)
         num_epochs = 10
-        model.train(num_epochs, train_data, callbacks=[ValAccMonitor(model, valid_data, num_epochs), ms.TimeMonitor])
+        model.train(num_epochs, train_data, callbacks=[ValAccMonitor(model, valid_data, num_epochs), ms.TimeMonitor()])
         # save
         ms.save_checkpoint(network, "mobilenet_v2.ckpt")
 
 
-    def evaluate(self,valid_data,model_path="",input_shape=(224,224),**kwargs):
+    def evaluate(self,data,model_path="",input_shape=(224,224),**kwargs):
         # load
         network = mobilenet_v2_fine_tune().get_model()
         ms.load_checkpoint("mobilenet_v2.ckpt", network)
         # eval
         network_loss = CrossEntropySmooth(sparse=True, reduction="mean", smooth_factor=0.1, classes_num=2)
         model = ms.Model(network, loss_fn=network_loss, optimizer=None, metrics={'acc'})
-        acc=model.eval(valid_data, dataset_sink_mode=False)
+        acc=model.eval(data, dataset_sink_mode=False)
         print(acc)
         return acc
 
@@ -82,9 +82,10 @@ class Estimator:
         # preprocess
         preprocessed_data=preprocess(data)
         # predict
-        pre=model.predict(preprocessed_data)
+        pre=model.predict(ms.Tensor(preprocessed_data))
         result=np.argmax(pre)
         class_name={0:"Croissants", 1:"Dog"}
+        print(class_name[result])
         return class_name[result]
 
     def load(self, model_url):

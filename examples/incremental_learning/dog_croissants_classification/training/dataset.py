@@ -40,7 +40,7 @@ class ImgDataset(BaseDataSource):
                 vision.Decode(),
                 vision.Resize(256),
                 vision.CenterCrop(image_shape),
-                vision.Normalize(mean=mean),
+                vision.Normalize(mean=mean, std=std),
                 vision.HWC2CHW()
             ]
         dataset = dataset.map(operations=trans,
