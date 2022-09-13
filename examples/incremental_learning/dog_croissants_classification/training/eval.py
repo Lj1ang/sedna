@@ -18,13 +18,7 @@ from sedna.core.incremental_learning import IncrementalLearning
 
 from interface import Estimator
 from dataset import ImgDataset
-'''
-os.environ["class_name"] = "Croissants, Dog"
-os.environ["input_shape"] = "224"
-os.environ["epochs"] = "10"
-os.environ["batch_size"] = "10"
-os.environ["MODEL_URL"] = "./best.ckpt"
-'''
+
 def main():
 
     class_names=Context.get_parameters("class_name")

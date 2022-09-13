@@ -1,7 +1,7 @@
 apiVersion: sedna.io/v1alpha1
 kind: IncrementalLearningJob
 metadata:
-  name: helmet-detection-demo
+  name: dog-croissants-classification-demo
 spec:
   initialModel:
     name: "initial-model"
@@ -23,7 +23,7 @@ spec:
               - name: "epochs"
                 value: "10"
               - name: "input_shape"
-                value: "224,224"
+                value: "224"
               - name: "class_names"
                 value: "Croissants, Dog"
     trigger:
@@ -33,7 +33,7 @@ spec:
         end: 20:00
       condition:
         operator: ">"
-        threshold: 500
+        threshold: 10
         metric: num_of_samples
   evalSpec:
     template:
@@ -46,7 +46,7 @@ spec:
             args: [ "eval.py" ]
             env:
               - name: "input_shape"
-                value: "352,640"
+                value: "224"
               - name: "class_names"
                 value: "Croissants, Dog"
   deploySpec:
@@ -63,9 +63,7 @@ spec:
       name: "IBT"
       parameters:
         - key: "threshold_img"
-          value: "0.9"
-        - key: "threshold_box"
-          value: "0.9"
+          value: "0.95"
     template:
       spec:
         nodeName: $WORKER_NODE
@@ -76,23 +74,23 @@ spec:
             args: [ "inference.py" ]
             env:
               - name: "input_shape"
-                value: "352,640"
-              - name: "video_url"
-                value: "file://video/video.mp4"
+                value: "224"
+              - name: "infer_url"
+                value: "/data/DogCroissants/infer/croissants.jpg"
               - name: "HE_SAVED_URL"
                 value: "/he_saved_url"
             volumeMounts:
-              - name: localvideo
-                mountPath: /video/
+              - name: localinferdir
+                mountPath: /data/DogCroissants/infer
               - name: hedir
                 mountPath: /he_saved_url
             resources: # user defined resources
               limits:
                 memory: 2Gi
         volumes: # user defined volumes
-          - name: localvideo
+          - name: localinferdir
             hostPath:
-              path: /incremental_learning/video/
+              path: /incremental_learning/data/DogCroissants/infer
               type: DirectoryOrCreate
           - name: hedir
             hostPath:

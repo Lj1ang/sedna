@@ -22,6 +22,7 @@ from sedna.core.incremental_learning import IncrementalLearning
 
 from interface import Estimator
 from dataset import ImgDataset
+os.environ['GLOG_v'] = '1'
 
 def main():
 
@@ -29,14 +30,16 @@ def main():
     print(Context.get_parameters("model_path"))
     #read parameters from deployment config
     input_shape=int(Context.get_parameters("input_shape"))
-
-
+    # load ckpt
+    model_url=Context.get_parameters("model_url")
+    print("model_url=" + model_url)
     # load dataset
     #train_dataset_url = BaseConfig.train_dataset_url
-    infer_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/infer/croissants.jpg"
+    infer_dataset_url=Context.get_parameters("infer_url")
     infer_data=Image.open(infer_dataset_url)
     incremental_instance = IncrementalLearning(estimator=Estimator)
     return incremental_instance.inference(data=infer_data,
+                                      model_url=model_url,
                                       class_names=class_names,
                                       input_shape=input_shape)
 

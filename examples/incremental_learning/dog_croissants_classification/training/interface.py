@@ -74,10 +74,10 @@ class Estimator:
         return acc
 
 
-    def predict(self, data, input_shape=None, **kwargs):
+    def predict(self, data,model_url=None, input_shape=None, **kwargs):
         # load
         network = mobilenet_v2_fine_tune().get_model()
-        ms.load_checkpoint("mobilenet_v2.ckpt", network)
+        ms.load_checkpoint(model_url, network)
         model=ms.Model(network)
         # preprocess
         preprocessed_data=preprocess(data)
