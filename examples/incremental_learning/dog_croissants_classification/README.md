@@ -5,24 +5,25 @@ auto-download
 
 ## Prepare for inference worker
 ```shell
-mkdir -p /incremental_learning/data/
+mkdir -p /incremental_learning/infer/
 mkdir -p /incremental_learning/he/
-mkdir -p /data/helmet_detection ? 
+mkdir -p /data/dog_croissants/
 mkdir /output
 ```
 
 download dataset
 ```shell
-cd /incremental_learning/data/
-wget https://mindspore-website.obs.cn-north-4.myhuaweicloud.com/notebook/datasets/beginner/DogCroissants.zip
-unzip DogCroissants.zip
+
+???
+
 ```
 
 download checkpoint
 ```shell
 mkdir -p /model/base_model
+mkdir -p /model/deploy_model
 cd /model/base_model
-wget "https://download.mindspore.cn/vision/classification/mobilenet_v2_1.0_224.ckpt"
+wget https://download.mindspore.cn/vision/classification/mobilenet_v2_1.0_224.ckpt
 ```
 ## build docker file
 ```shell
@@ -42,8 +43,8 @@ kind: Dataset
 metadata:
   name: incremental-dataset
 spec:
-  url: "/incremental_ learning/data/DogCroissants/train"
-  format: "image"
+  url: "/data/dog_croissants/train_data/train_data.txt"
+  format: "txt"
   nodeName: $WORKER_NODE
 EOF
 ```
@@ -84,7 +85,7 @@ spec:
     name: "initial-model"
   dataset:
     name: "incremental-dataset"
-    trainProb: 0.8
+    trainProb: 0.9
   trainSpec:
     template:
       spec:
@@ -96,7 +97,7 @@ spec:
             args: [ "train.py" ]
             env:
               - name: "batch_size"
-                value: "10"
+                value: "8"
               - name: "epochs"
                 value: "10"
               - name: "input_shape"
@@ -106,11 +107,11 @@ spec:
     trigger:
       checkPeriodSeconds: 60
       timer:
-        start: 02:00
-        end: 20:00
+        start: 01:00
+        end: 10:00
       condition:
         operator: ">"
-        threshold: 10
+        threshold: 20
         metric: num_of_samples
   evalSpec:
     template:
@@ -129,7 +130,7 @@ spec:
   deploySpec:
     model:
       name: "deploy-model"
-      hotUpdateEnabled: false
+      hotUpdateEnabled: true
       pollPeriodSeconds: 60
     trigger:
       condition:
@@ -137,10 +138,10 @@ spec:
         threshold: 0.1
         metric: precision_delta
     hardExampleMining:
-      name: "IBT"
+      name: "Random"
       parameters:
-        - key: "threshold_img"
-          value: "0.95"
+        - key: "random_ratio"
+          value: "0.3"
     template:
       spec:
         nodeName: $WORKER_NODE
@@ -153,25 +154,25 @@ spec:
               - name: "input_shape"
                 value: "224"
               - name: "infer_url"
-                value: "/home/data/DogCroissants/infer/croissants.jpg"
+                value: "/incremental_learning/infer"
               - name: "HE_SAVED_URL"
-                value: "/he_saved_url"
+                value: "/incremental_learning/he"
             volumeMounts:
               - name: localinferdir
-                mountPath: /home/data/DogCroissants/infer
+                mountPath: /incremental_learning/infer
               - name: hedir
-                mountPath: /he_saved_url
+                mountPath: /incremental_learning/he
             resources: # user defined resources
               limits:
                 memory: 2Gi
         volumes: # user defined volumes
           - name: localinferdir
             hostPath:
-              path: /incremental_learning/data/DogCroissants/infer
+              path: /incremental_learning/infer
               type: DirectoryOrCreate
           - name: hedir
             hostPath:
-              path: /incremental_learning/he/
+              path: /incremental_learning/he
               type: DirectoryOrCreate
   outputDir: "/output"
 EOF

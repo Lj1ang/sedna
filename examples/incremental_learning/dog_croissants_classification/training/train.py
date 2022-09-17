@@ -20,18 +20,18 @@ from interface import Estimator
 from dataset import ImgDataset
 
 def main():
-
-    class_names=Context.get_parameters("class_name")
-    print(Context.get_parameters("model_path"))
+    # base_model_url means the low accuracy model
+    base_model_url=Context.get_parameters("base_model_url")
+    # model_url means the checkpoint file that has been trained
+    deploy_model_url = Context.get_parameters("deploy_model_url")
     #read parameters from deployment config
     input_shape=int(Context.get_parameters("input_shape"))
     epochs=int(Context.get_parameters('epochs'))
     batch_size=int(Context.get_parameters("batch_size"))
 
     # load dataset
-    #train_dataset_url = BaseConfig.train_dataset_url
-    train_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/train"
-    valid_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/val"
+    train_dataset_url=Context.get_parameters("TRAIN_DATASET_URL")
+    valid_dataset_url=Context.get_parameters("TEST_DATASET_URL")
     train_data = ImgDataset(data_type="train").parse(path=train_dataset_url,
                                                      train=True,
                                                      image_shape=input_shape,
@@ -42,11 +42,10 @@ def main():
                                                   batch_size=batch_size)
     incremental_instance = IncrementalLearning(estimator=Estimator)
     return incremental_instance.train(train_data=train_data,
+                                      base_model_url=base_model_url,
+                                      deploy_model_url=deploy_model_url,
                                       valid_data=valid_data,
-                                      epochs=epochs,
-                                      batch_size=batch_size,
-                                      class_names=class_names,
-                                      input_shape=input_shape)
+                                      epochs=epochs)
 
 if __name__ == "__main__":
     main()

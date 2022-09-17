@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 
-from sedna.common.config import Context, BaseConfig
+
+from sedna.common.config import Context
 from sedna.core.incremental_learning import IncrementalLearning
 
 from interface import Estimator
@@ -26,10 +26,7 @@ def main():
     #read parameters from deployment config
     input_shape=int(Context.get_parameters("input_shape"))
     batch_size=int(Context.get_parameters("batch_size"))
-
-    # load dataset
-    #train_dataset_url = BaseConfig.train_dataset_url
-    valid_dataset_url="/home/lj1ang/Workspace/Python/NNFS/mindspore/datasets/DogCroissants/val"
+    valid_dataset_url=Context.get_parameters("TEST_DATASET_URL")
     valid_data=ImgDataset(data_type="eval").parse(path=valid_dataset_url,
                                                   train=False,
                                                   image_shape=input_shape,

@@ -19,7 +19,7 @@ spec:
             args: [ "train.py" ]
             env:
               - name: "batch_size"
-                value: "10"
+                value: "8"
               - name: "epochs"
                 value: "10"
               - name: "input_shape"
@@ -33,7 +33,7 @@ spec:
         end: 20:00
       condition:
         operator: ">"
-        threshold: 10
+        threshold: 30
         metric: num_of_samples
   evalSpec:
     template:
@@ -60,10 +60,10 @@ spec:
         threshold: 0.1
         metric: precision_delta
     hardExampleMining:
-      name: "IBT"
+      name: "Random"
       parameters:
-        - key: "threshold_img"
-          value: "0.95"
+        - key: "random_ratio"
+          value: "0.3"
     template:
       spec:
         nodeName: $WORKER_NODE
@@ -76,7 +76,7 @@ spec:
               - name: "input_shape"
                 value: "224"
               - name: "infer_url"
-                value: "/data/DogCroissants/infer/croissants.jpg"
+                value: ""
               - name: "HE_SAVED_URL"
                 value: "/he_saved_url"
             volumeMounts:

@@ -26,6 +26,7 @@ from mindvision.engine.loss import CrossEntropySmooth
 from mindvision.engine.callback import ValAccMonitor
 from mobilenet_v2 import mobilenet_v2_fine_tune
 
+
 os.environ['BACKEND_TYPE'] = 'MINDSPORE'
 
 def preprocess(img:PIL.Image.Image):
@@ -50,22 +51,23 @@ class Estimator:
 
     # TODO:save url
     # example : https://www.mindspore.cn/doc/programming_guide/zh-CN/r1.0/train.html#id3
-    def train(self, train_data, valid_data=None, **kwargs):
-        network=mobilenet_v2_fine_tune().get_model()
+    def train(self, train_data,base_model_url, deploy_model_url, valid_data=None,epochs=10, **kwargs):
+        network=mobilenet_v2_fine_tune(base_model_url).get_model()
         network_opt=nn.Momentum(params=network.trainable_params(),learning_rate=0.01,momentum=0.9)
         network_loss=CrossEntropySmooth(sparse=True, reduction="mean", smooth_factor=0.1, classes_num=2)
         metrics = {"Accuracy" : nn.Accuracy()}
         model=ms.Model(network, loss_fn=network_loss, optimizer=network_opt, metrics=metrics)
-        num_epochs = 10
-        model.train(num_epochs, train_data, callbacks=[ValAccMonitor(model, valid_data, num_epochs), ms.TimeMonitor()])
-        # save
-        ms.save_checkpoint(network, "mobilenet_v2.ckpt")
+        num_epochs = epochs
+        #best_ckpt_name=deploy_model_url.split(r"/")[-1]
+        #ckpt_dir=deploy_model_url.replace(best_ckpt_name, "")
+        model.train(num_epochs, train_data, callbacks=[ValAccMonitor(model, valid_data, num_epochs, save_best_ckpt=False), ms.TimeMonitor()])
+        # sedna will save model checkpoint in the path which is the value of MODEL_URL or MODEL_PATH
+        ms.save_checkpoint(network, deploy_model_url)
 
 
-    def evaluate(self,data,model_path="",input_shape=(224,224),**kwargs):
+    def evaluate(self,data,model_url,input_shape=(224,224),**kwargs):
         # load
-        network = mobilenet_v2_fine_tune().get_model()
-        ms.load_checkpoint("mobilenet_v2.ckpt", network)
+        network = mobilenet_v2_fine_tune(model_url).get_model()
         # eval
         network_loss = CrossEntropySmooth(sparse=True, reduction="mean", smooth_factor=0.1, classes_num=2)
         model = ms.Model(network, loss_fn=network_loss, optimizer=None, metrics={'acc'})
@@ -74,19 +76,18 @@ class Estimator:
         return acc
 
 
-    def predict(self, data,model_url=None, input_shape=None, **kwargs):
+    def predict(self, data,model, input_shape=None, **kwargs):
         # load
-        network = mobilenet_v2_fine_tune().get_model()
-        ms.load_checkpoint(model_url, network)
-        model=ms.Model(network)
+
         # preprocess
         preprocessed_data=preprocess(data)
         # predict
         pre=model.predict(ms.Tensor(preprocessed_data))
         result=np.argmax(pre)
         class_name={0:"Croissants", 1:"Dog"}
-        print(class_name[result])
-        return class_name[result]
+        #print(class_name[result])
+        #return class_name[result]
+        return pre
 
     def load(self, model_url):
         pass

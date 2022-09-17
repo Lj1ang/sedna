@@ -45,7 +45,7 @@ class ImgDataset(BaseDataSource):
             ]
         dataset = dataset.map(operations=trans,
                               input_columns="image",
-                              num_parallel_workers=8)
+                              num_parallel_workers=1)
         dataset = dataset.batch(batch_size, drop_remainder=True)
         return dataset
 
