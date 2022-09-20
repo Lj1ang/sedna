@@ -19,7 +19,7 @@ from PIL import Image
 from sedna.common.config import Context
 from sedna.core.incremental_learning import IncrementalLearning
 from interface import Estimator
-import cv2
+import shutil
 import mindspore as ms
 from mobilenet_v2 import mobilenet_v2_fine_tune
 
@@ -27,10 +27,9 @@ from mobilenet_v2 import mobilenet_v2_fine_tune
 he_saved_url = Context.get_parameters("HE_SAVED_URL", './tmp')
 
 def output_deal(is_hard_example, infer_image_path):
-    img=cv2.imread(infer_image_path)
     img_name=infer_image_path.split(r"/")[-1]
     if is_hard_example:
-        cv2.imwrite(f"{he_saved_url}/{img_name}",img)
+        shutil.copy(infer_image_path,f"{he_saved_url}/{img_name}")
 
 def main():
 
@@ -45,8 +44,8 @@ def main():
     model_url=Context.get_parameters("model_url")
     print("model_url=" + model_url)
     # load model ckpt here
-    network = mobilenet_v2_fine_tune().get_model()
-    ms.load_checkpoint(model_url, network)
+    network = mobilenet_v2_fine_tune(base_model_url=model_url).get_model()
+    #ms.load_checkpoint(model_url, network)
     model = ms.Model(network)
     # load dataset
     #train_dataset_url = BaseConfig.train_dataset_url

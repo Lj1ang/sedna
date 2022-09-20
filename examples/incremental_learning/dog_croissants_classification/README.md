@@ -20,10 +20,11 @@ download dataset
 
 download checkpoint
 ```shell
-mkdir -p /model/base_model
-mkdir -p /model/deploy_model
-cd /model/base_model
-wget https://download.mindspore.cn/vision/classification/mobilenet_v2_1.0_224.ckpt
+# need ckpt file under both two dir
+mkdir -p /models/base_model
+mkdir -p /models/deploy_model
+cd /models/base_model
+#wget https://download.mindspore.cn/vision/classification/mobilenet_v2_1.0_224.ckpt
 ```
 ## build docker file
 ```shell
@@ -56,7 +57,7 @@ kind: Model
 metadata:
   name: initial-model
 spec:
-  url : "/models/base_model/mobilenet_v2_1.0_224.ckpt"
+  url : "/models/base_model"
   format: "ckpt"
 EOF
 ```
@@ -68,13 +69,13 @@ kind: Model
 metadata:
   name: deploy-model
 spec:
-  url : "/models/deploy_model/saved_model.ckpt"
+  url : "/models/deploy_model/deploy_model.ckpt"
   format: "ckpt"
 EOF
 ```
 create the job
 ```shell
-IMAGE=
+IMAGE=lj1ang/dog:v0.10
 kubectl create -f - <<EOF
 apiVersion: sedna.io/v1alpha1
 kind: IncrementalLearningJob
@@ -154,14 +155,14 @@ spec:
               - name: "input_shape"
                 value: "224"
               - name: "infer_url"
-                value: "/incremental_learning/infer"
+                value: "/infer"
               - name: "HE_SAVED_URL"
-                value: "/incremental_learning/he"
+                value: "/he_saved_url"
             volumeMounts:
               - name: localinferdir
-                mountPath: /incremental_learning/infer
+                mountPath: /infer
               - name: hedir
-                mountPath: /incremental_learning/he
+                mountPath: /he_saved_url
             resources: # user defined resources
               limits:
                 memory: 2Gi
@@ -182,4 +183,11 @@ EOF
 cd /data/helmet_detection
 wget  https://kubeedge.obs.cn-north-1.myhuaweicloud.com/examples/helmet-detection/dataset.tar.gz
 tar -zxvf dataset.tar.gz
+```
+## delete
+```shell
+kubectl delete dataset incremental-dataset
+kubectl delete model initial-model
+kubectl delete model deploy-model
+kubectl delete IncrementalLearningJob dog-croissants-classification-demo
 ```

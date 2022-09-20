@@ -14,18 +14,16 @@ class mobilenet_v2_fine_tune:
         else:
             dl.download_url(models_download_url,filename=base_model_url )
         self.network = mobilenet_v2(num_classes=2, resize=224)
+        #print("base_model_url == "+base_model_url)
         self.param_dict = ms.load_checkpoint(base_model_url)
         self.filter_list=[x.name for x in self.network.head.classifier.get_parameters()]
-
-    def filter_ckpt_parameter(self, origin_dict, param_filter):
-        for key in list(origin_dict.keys()):
-            for name in param_filter:
+        for key in list(self.param_dict.keys()):
+            for name in self.filter_list:
                 if name in key:
                     print("Delete parameter from checkpoint: ", key)
-                    del origin_dict[key]
+                    del self.param_dict[key]
                     break
+        ms.load_param_into_net(self.network, self.param_dict)
 
     def get_model(self):
-        self.filter_ckpt_parameter(self.param_dict, self.filter_list)
-        ms.load_param_into_net(self.network, self.param_dict)
         return self.network
