@@ -75,7 +75,7 @@ EOF
 ```
 create the job
 ```shell
-IMAGE=lj1ang/dog:v0.10
+IMAGE=lj1ang/dog:v0.14
 kubectl create -f - <<EOF
 apiVersion: sedna.io/v1alpha1
 kind: IncrementalLearningJob

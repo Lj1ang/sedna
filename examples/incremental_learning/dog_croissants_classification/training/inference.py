@@ -28,8 +28,9 @@ he_saved_url = Context.get_parameters("HE_SAVED_URL", './tmp')
 
 def output_deal(is_hard_example, infer_image_path):
     img_name=infer_image_path.split(r"/")[-1]
+    img_category = infer_image_path.split(r"/")[-2]
     if is_hard_example:
-        shutil.copy(infer_image_path,f"{he_saved_url}/{img_name}")
+        shutil.copy(infer_image_path,f"{he_saved_url}/{img_category}_{img_name}")
 
 def main():
 
@@ -52,15 +53,16 @@ def main():
     infer_dataset_url=Context.get_parameters("infer_url")
     print(infer_dataset_url)
     # get each image unber infer_dataset_url with wildcard
-    for each_img in glob.glob(infer_dataset_url+"/*/*"):
-        infer_data=Image.open(each_img)
-        results, _, is_hard_example = incremental_instance.inference(data=infer_data,
-                                                    model=model,
-                                                    class_names=class_names,
-                                                    input_shape=input_shape)
-        hard_example="is hard example" if is_hard_example else "is not hard example"
-        print(f"{each_img}--->{results}-->{hard_example}")
-        #output_deal(is_hard_example, infer_dataset_url)
+    while True:
+        for each_img in glob.glob(infer_dataset_url+"/*/*"):
+            infer_data=Image.open(each_img)
+            results, _, is_hard_example = incremental_instance.inference(data=infer_data,
+                                                        model=model,
+                                                        class_names=class_names,
+                                                        input_shape=input_shape)
+            hard_example="is hard example" if is_hard_example else "is not hard example"
+            print(f"{each_img}--->{results}-->{hard_example}")
+            output_deal(is_hard_example, each_img)
 
 if __name__ == "__main__":
     main()
