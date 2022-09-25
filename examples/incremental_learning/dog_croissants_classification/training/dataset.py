@@ -14,7 +14,6 @@
 
 import mindspore.dataset as ds
 import mindspore.dataset.vision as vision
-from mindvision.dataset import DownLoad
 from sedna.datasources import BaseDataSource
 
 
@@ -22,15 +21,15 @@ class ImgDataset(BaseDataSource):
     def __init__(self, data_type="train", func=None):
         super(ImgDataset, self).__init__(data_type=data_type, func=func)
 
-    def parse(self, *args, path=None, train=True, image_shape=224, batch_size=10, **kwargs):
+    def parse(self, *args, path=None, train=True, image_shape=224, batch_size=2,num_parallel_workers=1, **kwargs):
         dataset = ds.ImageFolderDataset(
-            path, num_parallel_workers=8,
+            path, num_parallel_workers=num_parallel_workers,
             class_indexing={"croissants": 0, "dog": 1})
         mean = [0.485 * 255, 0.456 * 255, 0.406 * 255]
         std = [0.229 * 255, 0.224 * 255, 0.225 * 255]
         if train:
             trans = [
-                vision.RandomCropDecodeResize(image_shape, scale=(0.08, 1.0)),
+                vision.RandomCropDecodeResize(image_shape, scale=(0.08, 1.0), ratio=(0.75, 1.333)),
                 vision.RandomHorizontalFlip(prob=0.5),
                 vision.Normalize(mean=mean, std=std),
                 vision.HWC2CHW()
@@ -45,7 +44,7 @@ class ImgDataset(BaseDataSource):
             ]
         dataset = dataset.map(operations=trans,
                               input_columns="image",
-                              num_parallel_workers=1)
+                              num_parallel_workers=num_parallel_workers)
         dataset = dataset.batch(batch_size, drop_remainder=True)
         return dataset
 

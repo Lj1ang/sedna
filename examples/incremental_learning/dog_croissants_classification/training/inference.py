@@ -45,7 +45,7 @@ def main():
     model_url=Context.get_parameters("model_url")
     print("model_url=" + model_url)
     # load model ckpt here
-    network = mobilenet_v2_fine_tune(base_model_url=model_url).get_model()
+    network = mobilenet_v2_fine_tune(base_model_url=model_url).get_eval_network()
     #ms.load_checkpoint(model_url, network)
     model = ms.Model(network)
     # load dataset

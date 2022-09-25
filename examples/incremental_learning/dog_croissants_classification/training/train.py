@@ -19,34 +19,49 @@ from sedna.core.incremental_learning import IncrementalLearning
 from interface import Estimator
 from dataset import ImgDataset
 
+
 def main():
     # base_model_url means the low accuracy model
     base_model_url=Context.get_parameters("base_model_url")
     # model_url means the checkpoint file that has been trained
-    deploy_model_url = Context.get_parameters("deploy_model_url")
+    # model_url is used for estimator.save, not in train.
+    trained_ckpt_url = Context.get_parameters("model_url")
     #read parameters from deployment config
     input_shape=int(Context.get_parameters("input_shape"))
     epochs=int(Context.get_parameters('epochs'))
     batch_size=int(Context.get_parameters("batch_size"))
-
+    num_parallel_workers=int(Context.get_parameters("num_parallel_workers"))
+    print("num_parallel_workers="+str(num_parallel_workers))
     # load dataset
-    train_dataset_url=Context.get_parameters("TRAIN_DATASET_URL")
-    valid_dataset_url=Context.get_parameters("TEST_DATASET_URL")
+    train_dataset_url=os.path.dirname(Context.get_parameters("ORIGINAL_DATASET_URL"))+"/train"
+    valid_dataset_url=os.path.dirname(Context.get_parameters("ORIGINAL_DATASET_URL"))+"/val"
+    if train_dataset_url:
+        print("train_dataset_url " + train_dataset_url)
+    else:
+        print("train_dataset_url: NULL ")
+    if valid_dataset_url:
+        print("valid_dataset_urlL : " + valid_dataset_url)
+    else:
+        print("valid_dataset_url : NULL")
+
+
     train_data = ImgDataset(data_type="train").parse(path=train_dataset_url,
                                                      train=True,
                                                      image_shape=input_shape,
-                                                     batch_size=batch_size)
+                                                     batch_size=batch_size,
+                                                     num_parallel_workers=num_parallel_workers)
     valid_data=ImgDataset(data_type="eval").parse(path=valid_dataset_url,
                                                   train=False,
                                                   image_shape=input_shape,
-                                                  batch_size=batch_size)
+                                                  batch_size=batch_size,
+                                                  num_parallel_workers=num_parallel_workers)
     incremental_instance = IncrementalLearning(estimator=Estimator)
     return incremental_instance.train(train_data=train_data,
                                       base_model_url=base_model_url,
-                                      deploy_model_url=deploy_model_url,
+                                      trained_ckpt_url=trained_ckpt_url,
                                       valid_data=valid_data,
-                                      epochs=epochs)
+                                      epochs=1)
 
 if __name__ == "__main__":
     main()
-
+    print("train_phase_done")

@@ -11,10 +11,10 @@ mkdir -p /data/dog_croissants/
 mkdir /output
 ```
 
-download dataset
+TODO:download dataset
 ```shell
 
-???
+
 
 ```
 
@@ -44,7 +44,7 @@ kind: Dataset
 metadata:
   name: incremental-dataset
 spec:
-  url: "/data/dog_croissants/train_data/train_data.txt"
+  url: "/data/dog_croissants/train_data.txt"
   format: "txt"
   nodeName: $WORKER_NODE
 EOF
@@ -57,7 +57,7 @@ kind: Model
 metadata:
   name: initial-model
 spec:
-  url : "/models/base_model"
+  url : "/models/base_model/base_model.ckpt"
   format: "ckpt"
 EOF
 ```
@@ -75,7 +75,7 @@ EOF
 ```
 create the job
 ```shell
-IMAGE=lj1ang/dog:v0.14
+IMAGE=lj1ang/dog:v0.40
 kubectl create -f - <<EOF
 apiVersion: sedna.io/v1alpha1
 kind: IncrementalLearningJob
@@ -86,7 +86,7 @@ spec:
     name: "initial-model"
   dataset:
     name: "incremental-dataset"
-    trainProb: 0.9
+    trainProb: 0.8
   trainSpec:
     template:
       spec:
@@ -98,21 +98,23 @@ spec:
             args: [ "train.py" ]
             env:
               - name: "batch_size"
-                value: "8"
+                value: "2"
               - name: "epochs"
-                value: "10"
+                value: "2"
               - name: "input_shape"
                 value: "224"
               - name: "class_names"
                 value: "Croissants, Dog"
+              - name: "num_parallel_workers"
+                value: "2"
     trigger:
       checkPeriodSeconds: 60
       timer:
-        start: 01:00
-        end: 10:00
+        start: 02:00
+        end: 20:00
       condition:
         operator: ">"
-        threshold: 20
+        threshold: 50
         metric: num_of_samples
   evalSpec:
     template:
@@ -126,6 +128,10 @@ spec:
             env:
               - name: "input_shape"
                 value: "224"
+              - name: "batch_size"
+                value: "2"
+              - name: "num_parallel_workers"
+                value: "2"              
               - name: "class_names"
                 value: "Croissants, Dog"
   deploySpec:
@@ -165,15 +171,15 @@ spec:
                 mountPath: /he_saved_url
             resources: # user defined resources
               limits:
-                memory: 2Gi
+                memory: 3Gi
         volumes: # user defined volumes
           - name: localinferdir
             hostPath:
-              path: /incremental_learning/infer
+              path: /incremental_learning/infer/
               type: DirectoryOrCreate
           - name: hedir
             hostPath:
-              path: /incremental_learning/he
+              path: /incremental_learning/he/
               type: DirectoryOrCreate
   outputDir: "/output"
 EOF
@@ -190,4 +196,9 @@ kubectl delete dataset incremental-dataset
 kubectl delete model initial-model
 kubectl delete model deploy-model
 kubectl delete IncrementalLearningJob dog-croissants-classification-demo
+```
+```shell
+ctr -n k8s.io image pull registry.aliyuncs.com/google_containers/pause:3.5
+ctr -n k8s.io image tag registry.aliyuncs.com/google_containers/pause:3.5 k8s.gcr.io/pause:3.5
+
 ```
